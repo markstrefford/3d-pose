@@ -1,10 +1,10 @@
 {
   "name": " ",
   "version": "0.0.1",
-  "description": "",
+  "description": "3D Pose Estimation in Browser",
   "keywords": "",
   "license": "",
-  "author": "",
+  "author": "Mark Strefford, Kavita Krishnaswamy",
   "scripts": {
     "build": "parcel build index.html",
     "dev": "parcel index.html --open",
@@ -12,6 +12,27 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.12.4"
+    "@babel/core": "^7.11.4",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^4.0.2",
+    "parcel-plugin-static-files-copy": "^2.4.3"
+  },
+  "dependencies": {
+    "@babel/plugin-transform-runtime": "^7.11.0",
+    "Math": "0.0.1-security",
+    "three": "^0.120",
+    "three-orbit-controls": "^82.1.0",
+    "three-stats": "^1.0.1"
+  },
+  "browserslist": [
+    "last 2 and_chr versions",
+    "last 2 chrome versions",
+    "last 2 opera versions",
+    "last 2 ios_saf versions",
+    "last 2 safari versions"
+  ],
+  "staticFiles": {
+    "staticPath": "tfjs",
+    "watcherGlob": "**"
   }
 }
