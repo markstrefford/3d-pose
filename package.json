@@ -32,7 +32,7 @@
     "last 2 safari versions"
   ],
   "staticFiles": {
-    "staticPath": "tfjs",
-    "watcherGlob": "**"
+    "staticPath": "3d-models",
+    "watcherGlob": "*/**"
   }
 }

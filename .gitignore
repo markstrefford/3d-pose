@@ -6,3 +6,6 @@ dist
 .cache
 .editorconfig
 .idea/
+3d-models/
+js/config.js
+.DS_Store
