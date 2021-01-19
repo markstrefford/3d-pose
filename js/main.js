@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { config } from './config';
 
-let container, stats, clock;
-let camera, scene, renderer, poseModel;
+let container, stats, clock, controls;
+let camera, scene, renderer, poseAvatar, poseAnimations, mixer;
 
 
 const init = () => {
@@ -19,18 +20,41 @@ const init = () => {
 
   clock = new THREE.Clock();
 
-  // loading manager
-  const loadingManager = new THREE.LoadingManager(  () => {
-    scene.add( poseModel );
-  } );
+  // Load Avatar
+  const avatarLoadingManager = new THREE.LoadingManager(  () => {
+    console.log(poseAvatar);
+    scene.add( poseAvatar );
+  });
 
-  // collada
-
-  const loader = new ColladaLoader( loadingManager );
+  const avatarLoader = new ColladaLoader( avatarLoadingManager );
   console.log('Loading model from ' + config.modelUrl);
-  loader.load( config.modelUrl, ( collada ) => {
-    poseModel = collada.scene;
-  } );
+  avatarLoader.load( config.modelUrl, ( collada ) => {
+    console.log(collada);
+    poseAvatar = collada.scene;
+    poseAvatar.scale.x = .05;
+    poseAvatar.scale.y = .05;
+    poseAvatar.scale.z = .05;
+
+    poseAvatar.traverse(  ( node ) => {
+      if ( node.isSkinnedMesh ) {
+        node.frustumCulled = false;
+      }
+    });
+  });
+
+  // Load animations
+  const animationLoadingManager = new THREE.LoadingManager(  () => {
+    console.log(poseAnimations);
+    mixer = new THREE.AnimationMixer( poseAvatar );
+    mixer.clipAction( poseAnimations[0] ).play();
+  });
+
+  const animationLoader = new ColladaLoader( animationLoadingManager );
+  console.log('Loading animations from ' + config.animationUrl);
+  animationLoader.load( config.animationUrl, ( collada ) => {
+    console.log(collada);
+    poseAnimations = collada.animations;
+  });
 
   //
 
@@ -53,6 +77,9 @@ const init = () => {
   stats = new Stats();
   container.appendChild( stats.dom );
 
+  //
+
+  controls = new OrbitControls( camera, renderer.domElement );
   //
 
   window.addEventListener( 'resize', onWindowResize, false );
@@ -79,11 +106,19 @@ const animate = () => {
 
 const render = () => {
 
+  // const delta = clock.getDelta();
+
+  // if ( poseAvatar !== undefined ) {
+  //
+  //   poseAvatar.rotation.z += delta * 0.5;
+  //
+  // }
+
   const delta = clock.getDelta();
 
-  if ( poseModel !== undefined ) {
+  if ( mixer !== undefined ) {
 
-    poseModel.rotation.z += delta * 0.5;
+    mixer.update( delta / 10 );
 
   }
 
