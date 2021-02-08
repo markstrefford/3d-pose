@@ -16,10 +16,16 @@ import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
 const scene = new THREE.Scene();
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
+scene.background = new THREE.Color('lightgrey');
 
-const light = new THREE.PointLight();
+let light
+light = new THREE.PointLight();
 light.position.set(2.5, 7.5, 15);
 scene.add(light);
+light = new THREE.AmbientLight( 0x404040 ); // soft white light
+light.intensity = 2.0;
+light.position.set(2, 8, 15);
+scene.add( light );
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0.8, 1.4, 1.0);
@@ -40,7 +46,7 @@ let lastAction = THREE.AnimationAction;
 const fbxLoader = new FBXLoader();
 
 fbxLoader.load(
-  'vanguard_t_choonyung.fbx',
+  'man.fbx',
   (object) => {
     object.scale.set(.01, .01, .01);
     mixer = new THREE.AnimationMixer(object);
@@ -53,57 +59,62 @@ fbxLoader.load(
     scene.add(object);
 
     // add an animation from another file
-    fbxLoader.load('vanguard@samba.fbx',
+
+    fbxLoader.load('man@running.fbx',
         (object) => {
-            console.log("loaded samba")
+            console.log("loaded running")
 
             let animationAction = mixer.clipAction(object.animations[0]);
             animationActions.push(animationAction)
-            animationsFolder.add(animations, "samba")
+            console.log(animations);
+            animationsFolder.add(animations, "running")
 
             //add an animation from another file
-            fbxLoader.load('vanguard@bellydance.fbx',
+            fbxLoader.load('man@hiphop.fbx',
                 (object) => {
-                    console.log("loaded bellydance")
+                    console.log("loaded hiphop")
                     let animationAction = mixer.clipAction(object.animations[0]);
                     animationActions.push(animationAction)
-                    animationsFolder.add(animations, "bellydance")
+                    animationsFolder.add(animations, "hiphop")
 
                     //add an animation from another file
-                    fbxLoader.load('vanguard@goofyrunning.fbx',
+                    fbxLoader.load('man@walking.fbx',
                         (object) => {
-                            console.log("loaded goofyrunning");
+                            console.log("loaded walking");
                             object.animations[0].tracks.shift() //delete the specific track that moves the object forward while running
                             //console.dir((object as any).animations[0])
                             let animationAction = mixer.clipAction(object.animations[0]);
                             animationActions.push(animationAction)
-                            animationsFolder.add(animations, "goofyrunning")
+                            animationsFolder.add(animations, "walking")
 
                             modelReady = true
                         },
                         (xhr) => {
-                            console.log('goofyrunning: ' + (xhr.loaded / xhr.total * 100) + '% loaded')
+                            console.log('walking: ' + (xhr.loaded / xhr.total * 100) + '% loaded')
                         },
                         (error) => {
-                            console.log('goofyrunning: ' + error);
+                            console.log('walking: ' + error);
                         }
                     )
                 },
                 (xhr) => {
-                    console.log('bellydance: ' + (xhr.loaded / xhr.total * 100) + '% loaded')
+                    console.log('hiphop: ' + (xhr.loaded / xhr.total * 100) + '% loaded')
                 },
                 (error) => {
-                    console.log('bellydance: ' + error);
+                    console.log('hiphop: ' + error);
                 }
             )
         },
         (xhr) => {
-            console.log('samba: ' + (xhr.loaded / xhr.total * 100) + '% loaded')
+            console.log('running: ' + (xhr.loaded / xhr.total * 100) + '% loaded')
         },
         (error) => {
-            console.log('samba: ' + error);
+            console.log('running: ' + error);
         }
     )
+
+
+
   },
   (xhr) => {
     console.log((xhr.loaded / xhr.total * 100) + '% loaded')
@@ -124,17 +135,18 @@ function onWindowResize() {
 const stats = Stats()
 document.body.appendChild(stats.dom)
 
+
 const animations = {
   default: function () {
     setAction(animationActions[0])
   },
-  samba: function () {
+  running: function () {
     setAction(animationActions[1])
   },
-  bellydance: function () {
+  hiphop: function () {
     setAction(animationActions[2])
   },
-  goofyrunning: function () {
+  walking: function () {
     setAction(animationActions[3])
   },
 }
