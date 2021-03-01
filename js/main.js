@@ -30,9 +30,24 @@ scene.add( light );
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0.8, 1.4, 1.0);
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+// const renderer = new THREE.WebGLRenderer();
+// renderer.setSize(window.innerWidth, window.innerHeight);
+// document.body.appendChild(renderer.domElement);
+
+const canvas = document.getElementById('rendercanvas');
+const renderer = new THREE.WebGLRenderer({
+  alpha: true,
+  canvas: canvas
+});
+// renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
+console.log(renderer);
+console.log(canvas);
+
+const debugCanvas = document.getElementById('debugcanvas');
+const debugCtx = debugCanvas.getContext('2d');
+debugCtx.clearRect(0, 0, 256, 256);
+console.log(debugCanvas);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.screenSpacePanning = true;
@@ -178,6 +193,14 @@ const animate =  () => {
 
   render()
 
+  // TODO: Will this work, or do we need to take a fixed aspect central part of the video feed
+  const srcDataURI = canvas.toDataURL();
+  const img = new window.Image();
+  img.addEventListener("load",  () => {
+    console.log('load');
+    debugCanvas.getContext("2d").drawImage(img, 0, 0);
+  });
+  img.setAttribute("src", srcDataURI);
   stats.update()
 };
 

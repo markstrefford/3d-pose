@@ -20,8 +20,9 @@ html {
  * Remove the margin in all browsers.
  */
 
-body {
+html, body {
   margin: 0;
+  height: 100%;
 }
 
 /**
