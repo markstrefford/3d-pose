@@ -6,13 +6,24 @@
 
  */
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
-import Stats from 'three/examples/jsm/libs/stats.module'
-import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
+import Stats from 'three/examples/jsm/libs/stats.module';
+import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
+
+import * as posenet from '@tensorflow-models/posenet';
+import '@tensorflow/tfjs-backend-webgl';
+
+// See https://github.com/tensorflow/tfjs-models/tree/master/posenet
+let net;
+const loadPosenet = async () => {
+  console.log('Loading Posenet...');
+  net = await posenet.load();
+  console.log('Posenet loaded!');
+}
+loadPosenet();
 
 // import { config } from './config';
-
 const scene = new THREE.Scene();
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
@@ -152,7 +163,6 @@ fbxLoader.load(
 const stats = Stats()
 document.body.appendChild(stats.dom)
 
-
 const animations = {
   default: function () {
     setAction(animationActions[0])
@@ -167,6 +177,8 @@ const animations = {
     setAction(animationActions[3])
   },
 }
+
+
 
 const setAction = (toAction) => {
   if (toAction != activeAction) {
@@ -186,7 +198,7 @@ animationsFolder.open()
 
 const clock = new THREE.Clock()
 
-const animate =  () => {
+const animate = async () => {
   requestAnimationFrame(animate)
 
   controls.update()
@@ -195,14 +207,23 @@ const animate =  () => {
 
   render()
 
-  // TODO: Will this work, or do we need to take a fixed aspect central part of the video feed
+  // Three.js uses a webGL render context which isn't compatible with TF expecting a 2d context
+  // So for now let's copy the three.js webgl canvas to another one that is 2d
+  // TODO:
   const srcDataURI = canvas.toDataURL();
   const img = new window.Image();
-  img.addEventListener("load",  () => {
+  img.addEventListener("load",  async () => {
     console.log('load');
     debugCanvas.getContext("2d").drawImage(img, 0, 0);
+    const pose = await net.estimateSinglePose(debugCanvas, {
+      flipHorizontal: false
+    });
+    console.log(pose);
   });
   img.setAttribute("src", srcDataURI);
+
+
+
   stats.update()
 };
 
