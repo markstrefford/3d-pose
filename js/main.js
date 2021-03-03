@@ -45,6 +45,8 @@ console.log(renderer);
 console.log(canvas);
 
 const debugCanvas = document.getElementById('debugcanvas');
+debugCanvas.width = window.innerWidth / 2;
+debugCanvas.height = window.innerHeight / 2;
 const debugCtx = debugCanvas.getContext('2d');
 debugCtx.clearRect(0, 0, 256, 256);
 console.log(debugCanvas);
@@ -139,13 +141,13 @@ fbxLoader.load(
   }
 )
 
-window.addEventListener('resize', onWindowResize, false)
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  render();
-}
+// window.addEventListener('resize', onWindowResize, false)
+// function onWindowResize() {
+//   camera.aspect = window.innerWidth / window.innerHeight;
+//   camera.updateProjectionMatrix();
+//   renderer.setSize(window.innerWidth, window.innerHeight);
+//   render();
+// }
 
 const stats = Stats()
 document.body.appendChild(stats.dom)
