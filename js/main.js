@@ -14,14 +14,17 @@ import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
 import * as posenet from '@tensorflow-models/posenet';
 import '@tensorflow/tfjs-backend-webgl';
 
+import {drawKeypoints, drawSkeleton} from './demo_util';
+
 // See https://github.com/tensorflow/tfjs-models/tree/master/posenet
-let net;
+let net, pose;
 const loadPosenet = async () => {
   console.log('Loading Posenet...');
   net = await posenet.load();
   console.log('Posenet loaded!');
 }
 loadPosenet();
+const minPartConfidence = 0.5;
 
 // import { config } from './config';
 const scene = new THREE.Scene();
@@ -52,8 +55,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 // renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
-console.log(renderer);
-console.log(canvas);
+const rendererCtx = renderer.getContext();
 
 const debugCanvas = document.getElementById('debugcanvas');
 debugCanvas.width = window.innerWidth / 2;
@@ -178,8 +180,6 @@ const animations = {
   },
 }
 
-
-
 const setAction = (toAction) => {
   if (toAction != activeAction) {
     lastAction = activeAction
@@ -209,20 +209,12 @@ const animate = async () => {
 
   // Three.js uses a webGL render context which isn't compatible with TF expecting a 2d context
   // So for now let's copy the three.js webgl canvas to another one that is 2d
-  // TODO:
-  const srcDataURI = canvas.toDataURL();
-  const img = new window.Image();
-  img.addEventListener("load",  async () => {
-    console.log('load');
-    debugCanvas.getContext("2d").drawImage(img, 0, 0);
-    const pose = await net.estimateSinglePose(debugCanvas, {
-      flipHorizontal: false
-    });
-    console.log(pose);
+  debugCtx.drawImage(renderer.domElement, 0, 0);
+  pose = await net.estimateSinglePose(debugCanvas, {
+    decodingMethod: 'single-person',
+    flipHorizontal: false
   });
-  img.setAttribute("src", srcDataURI);
-
-
+  // net.drawSkeleton(pose.keypoints, minPartConfidence, debugCtx);
 
   stats.update()
 };
