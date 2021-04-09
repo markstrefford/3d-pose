@@ -11,6 +11,7 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
 
+import * as tf from '@tensorflow/tfjs-core';
 import * as posenet from '@tensorflow-models/posenet';
 import '@tensorflow/tfjs-backend-webgl';
 
@@ -57,12 +58,13 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(window.innerWidth / 2, window.innerHeight / 2);
 const rendererCtx = renderer.getContext();
 
-const debugCanvas = document.getElementById('debugcanvas');
-debugCanvas.width = window.innerWidth / 2;
-debugCanvas.height = window.innerHeight / 2;
-const debugCtx = debugCanvas.getContext('2d');
-debugCtx.clearRect(0, 0, 256, 256);
-console.log(debugCanvas);
+const predictCanvas = document.getElementById('predcanvas');
+predictCanvas.width = window.innerWidth / 2;
+predictCanvas.height = window.innerHeight / 2;
+const predictCtx = predictCanvas.getContext('2d');
+predictCtx.clearRect(0, 0, 256, 256);
+console.log(predictCanvas);
+console.log(predictCtx);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.screenSpacePanning = true;
@@ -189,6 +191,7 @@ const setAction = (toAction) => {
     activeAction.reset()
     //activeAction.fadeIn(1)
     activeAction.play()
+    console.log(scene)
   }
 }
 
@@ -209,8 +212,12 @@ const animate = async () => {
 
   // Three.js uses a webGL render context which isn't compatible with TF expecting a 2d context
   // So for now let's copy the three.js webgl canvas to another one that is 2d
-  debugCtx.drawImage(renderer.domElement, 0, 0);
-  pose = await net.estimateSinglePose(debugCanvas, {
+  predictCtx.drawImage(renderer.domElement, 0, 0);
+  const predImage = tf.browser.fromPixels(predictCanvas);
+  // console.log(predImage.dataSync());
+  console.log(document.getElementById("tfcanvas"));
+  await tf.browser.toPixels(predImage, document.getElementById("tfcanvas"));
+  pose = await net.estimateSinglePose(predImage, {
     decodingMethod: 'single-person',
     flipHorizontal: false
   });
@@ -223,3 +230,5 @@ function render() {
   renderer.render(scene, camera)
 }
 animate();
+
+// t = (0, tf.pad3d)(t, [[l, p], [c, f], [0, 0]])).resizeBilinear([n, r]
